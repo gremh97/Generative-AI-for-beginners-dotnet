@@ -20,7 +20,8 @@
         bool showFps,
         int fps,
         double aiFps,
-        int elapsedSeconds)
+        int elapsedSeconds,
+        string screenshotMessage)
     {
         backBuffer.Clear();
         DrawBoundingBox(backBuffer);
@@ -58,6 +59,17 @@
                 int left = 2;
                 for (int j = 0; j < line.Length && left + j < backBuffer.Cols - 1; j++)
                     backBuffer.Set(left + j, baseLine + i, line[j], ConsoleColor.Green);
+            }
+        }
+        
+        // Screenshot message - show in the bottom area
+        if (!string.IsNullOrEmpty(screenshotMessage))
+        {
+            int messageY = backBuffer.Rows - _aiInfoLines / 2 - 1; // Show in middle of bottom area
+            int messageX = (backBuffer.Cols - screenshotMessage.Length) / 2;
+            for (int i = 0; i < screenshotMessage.Length && messageX + i < backBuffer.Cols - 1; i++)
+            {
+                backBuffer.Set(messageX + i, messageY, screenshotMessage[i], ConsoleColor.Yellow);
             }
         }
         for (int y = 0; y < backBuffer.Rows; y++)

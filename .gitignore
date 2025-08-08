@@ -399,3 +399,7 @@ FodyWeavers.xsd
 
 .venv/
 .env
+
+# SpaceAINet screenshots
+**/screenshots/screenshot_*.txt
+.DS_Store

@@ -47,6 +47,16 @@ public static class GameManager
     private static double _lastAiFps = 0;
     private static DateTime _lastFpsUpdate = DateTime.Now;
     private static bool _showFps = false;
+    
+    // Screenshot notification
+    private static string _screenshotMessage = "";
+    private static DateTime _screenshotMessageTime = DateTime.MinValue;
+    private static readonly TimeSpan _screenshotMessageDuration = TimeSpan.FromSeconds(2);
+    
+    // AI instruction timing
+    private static DateTime _lastAIInstructionDisplayTime = DateTime.MinValue;
+    private static readonly TimeSpan _aiInstructionDisplayDuration = TimeSpan.FromSeconds(3);
+    
     // Use nullable event to avoid CS8618
     public static event Action? AIFrameProcessed;
 
@@ -106,14 +116,14 @@ public static class GameManager
                 _lastFpsUpdate = now;
             }
 
-            _gameRenderer.Render(_frontBuffer, _backBuffer, _entities, _gameOver, _win, _aiInstructions, _aiState, true, _lastFps, _lastAiFps, _elapsedSeconds);
+            _gameRenderer.Render(_frontBuffer, _backBuffer, _entities, _gameOver, _win, GetCurrentAIInstructions(), _aiState, true, _lastFps, _lastAiFps, _elapsedSeconds, GetCurrentScreenshotMessage());
             int frameTime = Environment.TickCount - frameStart;
             int sleep = _gameSpeedMs - frameTime;
             if (sleep > 0) Thread.Sleep(sleep);
         }
         
         // Render one final frame to show game over/win message with complete borders
-        _gameRenderer.Render(_frontBuffer, _backBuffer, _entities, _gameOver, _win, _aiInstructions, _aiState, true, _lastFps, _lastAiFps, _elapsedSeconds);
+        _gameRenderer.Render(_frontBuffer, _backBuffer, _entities, _gameOver, _win, GetCurrentAIInstructions(), _aiState, true, _lastFps, _lastAiFps, _elapsedSeconds, GetCurrentScreenshotMessage());
         
         // Ensure rendering is complete before moving cursor
         Thread.Sleep(100);
@@ -176,6 +186,8 @@ public static class GameManager
             case ConsoleKey.S:
                 // Screenshot is now a global key
                 ScreenshotService.Capture(_frontBuffer.CharBuffer, _frontBuffer.ColorBuffer);
+                _screenshotMessage = "Screenshot saved!";
+                _screenshotMessageTime = DateTime.Now;
                 return;
         }
 
@@ -210,7 +222,8 @@ public static class GameManager
                 _frontBuffer.Cols - 4,
                 ApplyAIAction,
                 GetFrameString,
-                _aiInstructions
+                _aiInstructions,
+                () => _lastAIInstructionDisplayTime = DateTime.Now // AI 지시사항 업데이트 시 시간 기록
             );
         }
     }
@@ -357,6 +370,28 @@ public static class GameManager
             sb.Append('\n');
         }
         return sb.ToString();
+    }
+
+    private static string GetCurrentScreenshotMessage()
+    {
+        if (DateTime.Now - _screenshotMessageTime <= _screenshotMessageDuration)
+        {
+            return _screenshotMessage;
+        }
+        return "";
+    }
+
+    private static string[] GetCurrentAIInstructions()
+    {
+        if (_aiState == AIState.Off)
+            return new string[AiInfoLines]; // 빈 배열 반환
+            
+        if (DateTime.Now - _lastAIInstructionDisplayTime <= _aiInstructionDisplayDuration)
+        {
+            return _aiInstructions; // 3초 내면 지시사항 표시
+        }
+        
+        return new string[AiInfoLines]; // 3초 지나면 빈 배열 반환
     }
 
     public static (char[,], ConsoleColor[,]) GetRenderState() => _frontBuffer.GetStateCopy();

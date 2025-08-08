@@ -5,6 +5,7 @@ public class AIInputManager
     private readonly Action<string> _applyAIAction;
     private readonly Func<char[,], string> _getFrameString;
     private readonly string[] _aiInstructions;
+    private readonly Action _onAIInstructionUpdated;
     private string _lastAction = "undefined";
     private string _lastFrameString;
     private string _pendingAIFrameString;
@@ -17,13 +18,15 @@ public class AIInputManager
         int notifWidth,
         Action<string> applyAIAction,
         Func<char[,], string> getFrameString,
-        string[] aiInstructions)
+        string[] aiInstructions,
+        Action onAIInstructionUpdated)
     {
         _aiProvider = aiProvider;
         _notifWidth = notifWidth;
         _applyAIAction = applyAIAction;
         _getFrameString = getFrameString;
         _aiInstructions = aiInstructions;
+        _onAIInstructionUpdated = onAIInstructionUpdated;
     }
 
     public void HandleAIInputNonBlocking(char[,] frontBuffer)
@@ -75,6 +78,7 @@ public class AIInputManager
                 _lastAction = result.nextaction;
                 _lastAppliedAIAction = result.nextaction;
                 _applyAIAction(_lastAppliedAIAction);
+                _onAIInstructionUpdated(); // AI 지시사항 업데이트 알림
             }
             else
             {
@@ -94,6 +98,7 @@ public class AIInputManager
                 _aiInstructions[2] = string.Empty;
                 _aiInstructions[3] = string.Empty;
                 _lastAppliedAIAction = null;
+                _onAIInstructionUpdated(); // AI 지시사항 업데이트 알림
             }
         }
         if (_aiAnalysisTask == null)
