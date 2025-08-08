@@ -1,14 +1,11 @@
-﻿using System.Drawing;
-using System.Drawing.Imaging;
+﻿using System.Text;
 
 namespace SpaceAINet.Screenshot;
 
 public static class ScreenshotService
 {
-    private static readonly string Folder = "screenshots";
+    private static readonly string Folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "screenshots");
     private static int _counter = 0;
-    private static readonly string FontName = "Consolas";
-    private static readonly int FontSize = 16;
 
     public static void Initialize()
     {
@@ -22,28 +19,10 @@ public static class ScreenshotService
     {
         int rows = chars.GetLength(0);
         int cols = chars.GetLength(1);
-        int cellWidth = FontSize;
-        int cellHeight = FontSize + 2;
-        using var bmp = new Bitmap(cols * cellWidth, rows * cellHeight);
-        using var g = Graphics.FromImage(bmp);
-        g.Clear(Color.Black);
-        using var font = new Font(FontName, FontSize, FontStyle.Regular, GraphicsUnit.Pixel);
-        for (int y = 0; y < rows; y++)
-        {
-            for (int x = 0; x < cols; x++)
-            {
-                char ch = chars[y, x];
-                if (ch == ' ') continue;
-                var color = ToDrawingColor(colors[y, x]);
-                using var brush = new SolidBrush(color);
-                g.DrawString(ch.ToString(), font, brush, x * cellWidth, y * cellHeight);
-            }
-        }
+        
         string baseName = $"screenshot_{_counter++:D4}";
-        string imagePath = Path.Combine(Folder, baseName + ".png");
-        bmp.Save(imagePath, ImageFormat.Png);
-
-        // Save the frame as a text file
+        
+        // Save the frame as a plain text file
         string textPath = Path.Combine(Folder, baseName + ".txt");
         using (var writer = new StreamWriter(textPath))
         {
@@ -56,55 +35,27 @@ public static class ScreenshotService
                 writer.WriteLine();
             }
         }
+
+        // Note: Colored version removed to keep it simple
+        // Only plain text screenshot is saved: {baseName}.txt
     }
 
     public static byte[] GetJpegBytes(char[,] chars, ConsoleColor[,] colors)
     {
+        // For cross-platform compatibility, return UTF-8 encoded text instead of JPEG
         int rows = chars.GetLength(0);
         int cols = chars.GetLength(1);
-        int cellWidth = FontSize;
-        int cellHeight = FontSize + 2;
-        using var bmp = new Bitmap(cols * cellWidth, rows * cellHeight);
-        using var g = Graphics.FromImage(bmp);
-        g.Clear(Color.Black);
-        using var font = new Font(FontName, FontSize, FontStyle.Regular, GraphicsUnit.Pixel);
+        
+        var sb = new StringBuilder();
         for (int y = 0; y < rows; y++)
         {
             for (int x = 0; x < cols; x++)
             {
-                char ch = chars[y, x];
-                if (ch == ' ') continue;
-                var color = ToDrawingColor(colors[y, x]);
-                using var brush = new SolidBrush(color);
-                g.DrawString(ch.ToString(), font, brush, x * cellWidth, y * cellHeight);
+                sb.Append(chars[y, x]);
             }
+            sb.AppendLine();
         }
-        using var ms = new MemoryStream();
-        bmp.Save(ms, ImageFormat.Jpeg);
-        return ms.ToArray();
-    }
-
-    private static Color ToDrawingColor(ConsoleColor c)
-    {
-        return c switch
-        {
-            ConsoleColor.Black => Color.Black,
-            ConsoleColor.DarkBlue => Color.DarkBlue,
-            ConsoleColor.DarkGreen => Color.DarkGreen,
-            ConsoleColor.DarkCyan => Color.DarkCyan,
-            ConsoleColor.DarkRed => Color.DarkRed,
-            ConsoleColor.DarkMagenta => Color.DarkMagenta,
-            ConsoleColor.DarkYellow => Color.FromArgb(128, 128, 0),
-            ConsoleColor.Gray => Color.Gray,
-            ConsoleColor.DarkGray => Color.DarkGray,
-            ConsoleColor.Blue => Color.Blue,
-            ConsoleColor.Green => Color.Green,
-            ConsoleColor.Cyan => Color.Cyan,
-            ConsoleColor.Red => Color.Red,
-            ConsoleColor.Magenta => Color.Magenta,
-            ConsoleColor.Yellow => Color.Yellow,
-            ConsoleColor.White => Color.White,
-            _ => Color.White
-        };
+        
+        return Encoding.UTF8.GetBytes(sb.ToString());
     }
 }

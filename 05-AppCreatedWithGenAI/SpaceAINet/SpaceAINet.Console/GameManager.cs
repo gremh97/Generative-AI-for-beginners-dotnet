@@ -121,6 +121,9 @@ public static class GameManager
 
         var key = Console.ReadKey(true);
 
+        // Debug: Write key info to a debug file (remove this after testing)
+        // File.AppendAllText("debug_keys.txt", $"Key pressed: {key.Key}, Modifiers: {key.Modifiers}\n");
+
         // Global keys (work in any mode)
         switch (key.Key)
         {
