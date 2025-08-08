@@ -106,7 +106,7 @@ public static class GameManager
                 _lastFpsUpdate = now;
             }
 
-            _gameRenderer.Render(_frontBuffer, _backBuffer, _entities, _gameOver, _win, _aiInstructions, _aiState, true, _lastFps, _lastAiFps);
+            _gameRenderer.Render(_frontBuffer, _backBuffer, _entities, _gameOver, _win, _aiInstructions, _aiState, true, _lastFps, _lastAiFps, _elapsedSeconds);
             int frameTime = Environment.TickCount - frameStart;
             int sleep = _gameSpeedMs - frameTime;
             if (sleep > 0) Thread.Sleep(sleep);

@@ -19,11 +19,12 @@
         object aiStateObj,
         bool showFps,
         int fps,
-        double aiFps)
+        double aiFps,
+        int elapsedSeconds)
     {
         backBuffer.Clear();
         DrawBoundingBox(backBuffer);
-        DrawUI(backBuffer, entities, aiStateObj, fps, aiFps);
+        DrawUI(backBuffer, entities, aiStateObj, fps, aiFps, elapsedSeconds);
         if (!gameOver && !win)
             backBuffer.Set(entities.Player.X + 1, entities.Player.Y + _uiBarHeight + 1, entities.Player.Symbol, entities.Player.Color);
         foreach (var e in entities.Enemies)
@@ -101,11 +102,11 @@
         }
     }
 
-    private void DrawUI(RenderState buf, GameEntities entities, object aiStateObj, int fps, double aiFps)
+    private void DrawUI(RenderState buf, GameEntities entities, object aiStateObj, int fps, double aiFps, int elapsedSeconds)
     {
         // First line: Score, Time, Bullets
         string score = $"Score: {entities.Score:0000}";
-        string time = $"Time: 00s"; // Time can be injected if needed
+        string time = $"Time: {elapsedSeconds:00}s";
         string bullets = $"Bullets: {entities.Player.MaxBullets - entities.Player.ActiveBullets}/{entities.Player.MaxBullets}";
         string ui1 = $"{score}   {time}   {bullets}";
         int left1 = (buf.Cols - ui1.Length) / 2;
