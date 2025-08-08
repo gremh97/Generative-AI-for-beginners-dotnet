@@ -11,10 +11,15 @@ if(string.IsNullOrEmpty(githubToken))
     githubToken = config["GITHUB_TOKEN"];
 }
 
+// IChatClient: 자연어 프롬프트를 보내고 응답을 받기 위한 추상 인터페이스
 IChatClient client = new ChatCompletionsClient(
-        endpoint: new Uri("https://models.github.ai/inference"),
-        new AzureKeyCredential(githubToken))
-        .AsIChatClient("Phi-3.5-MoE-instruct");
+    // endpoint: GitHub 모델 서버의 주소 (AI 모델이 실제로 작동하는 API 위치)
+    endpoint: new Uri("https://models.github.ai/inference"),
+    // 인증 토큰을 전달하는 객체 (API 사용 권한 증명)
+    new AzureKeyCredential(githubToken))
+    // AsIChatClient: 위 모델 클라이언트를 "Phi-3.5-MoE-instruct" 모델을 사용하는 IChatClient 인터페이스로 변환
+    .AsIChatClient("Phi-3.5-MoE-instruct");
+
 
 // here we're building the prompt
 StringBuilder prompt = new StringBuilder();
