@@ -111,6 +111,18 @@ public static class GameManager
             int sleep = _gameSpeedMs - frameTime;
             if (sleep > 0) Thread.Sleep(sleep);
         }
+        
+        // Render one final frame to show game over/win message with complete borders
+        _gameRenderer.Render(_frontBuffer, _backBuffer, _entities, _gameOver, _win, _aiInstructions, _aiState, true, _lastFps, _lastAiFps, _elapsedSeconds);
+        
+        // Ensure rendering is complete before moving cursor
+        Thread.Sleep(100);
+        
+        // Move cursor below the game area and make it visible again
+        Console.SetCursorPosition(0, _frontBuffer.Rows + 1);
+        Console.WriteLine(); // Add a blank line for better separation
+        Console.CursorVisible = true;
+        Console.ResetColor();
     }
 
     // Unified input processing for both global and gameplay keys
